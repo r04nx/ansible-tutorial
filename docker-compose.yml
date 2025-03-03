@@ -1,0 +1,119 @@
+version: '3'
+
+networks:
+  production:
+    name: production
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+
+services:
+  Webserver:
+    image: ubuntu:latest
+    container_name: Webserver
+    hostname: Webserver
+    restart: unless-stopped
+    networks:
+      production:
+        ipv4_address: 192.168.100.10
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y openssh-server python3 sudo && 
+        mkdir -p /run/sshd && 
+        mkdir -p /root/.ssh && 
+        echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDvNUA8tkhRe58LD1YOjnSK4g20jmKHb07ETrXdOGr5C4xFPEOCayPRb7wP+Pl8/1ZvMnJFmcSR9aToKClfgJMtKgkZEZk+vK5TTCev2VQaTAFFH7ePq3gTKpMW4vSaKNrMn/ouMUHAoPK/Wmg8Fd0mIo85rVznxnNL8cvj68wraKMRiqb5YD16rVzX62qxUHXuU7QEBS4PEpgBxQplyqSD90B9rbepvTYMkwEusjPdo7BzCh38KO8mInJZY+Ji1ue+Kl9QuEfX+Rn73puz8m1AdrA+QocA0phK2SO4kBdjX3KcsN/H6a77NWBsCbE6EYhv2o/z4kaCr3k5Y2gfTS0wIp5gbkcIeyPJ8Vyg62nlkOTywkVA9L2bHQluhn4aiLFAdGAF4hIXSazLmkUUW68a/T9TasDyBuaRiBwp2keB4qhcs+b4sIXPnskOsZHw4w+stJX9GLc9kGegvmwWrlpgitUVf8/IiJqIg7VZlBkk1wOg4BSEhvx2lolhE+SW3zg/6uP/z0yipUk3LMMuzRh9Pi6C6y81RyvlKjetaGdqq7fWcrbnkHOVKJqwSxaCYgb48at03rIuDrI+Dl3nqOh92reexWg4hovDWES1hV3E+2Abn7nrD8xAXBcUGdXB/1RmgQPIZREviYwd2WZZ8tlU7teb8xlYMKquIXxk6VxF9Q== ubuntu@devops' > /root/.ssh/authorized_keys && 
+        chmod 700 /root/.ssh && 
+        chmod 600 /root/.ssh/authorized_keys && 
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && 
+        sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && 
+        /usr/sbin/sshd -D
+      "
+
+  FTP:
+    image: ubuntu:latest
+    container_name: FTP
+    hostname: FTP
+    restart: unless-stopped
+    networks:
+      production:
+        ipv4_address: 192.168.100.20
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y openssh-server python3 sudo && 
+        mkdir -p /run/sshd && 
+        mkdir -p /root/.ssh && 
+        echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDvNUA8tkhRe58LD1YOjnSK4g20jmKHb07ETrXdOGr5C4xFPEOCayPRb7wP+Pl8/1ZvMnJFmcSR9aToKClfgJMtKgkZEZk+vK5TTCev2VQaTAFFH7ePq3gTKpMW4vSaKNrMn/ouMUHAoPK/Wmg8Fd0mIo85rVznxnNL8cvj68wraKMRiqb5YD16rVzX62qxUHXuU7QEBS4PEpgBxQplyqSD90B9rbepvTYMkwEusjPdo7BzCh38KO8mInJZY+Ji1ue+Kl9QuEfX+Rn73puz8m1AdrA+QocA0phK2SO4kBdjX3KcsN/H6a77NWBsCbE6EYhv2o/z4kaCr3k5Y2gfTS0wIp5gbkcIeyPJ8Vyg62nlkOTywkVA9L2bHQluhn4aiLFAdGAF4hIXSazLmkUUW68a/T9TasDyBuaRiBwp2keB4qhcs+b4sIXPnskOsZHw4w+stJX9GLc9kGegvmwWrlpgitUVf8/IiJqIg7VZlBkk1wOg4BSEhvx2lolhE+SW3zg/6uP/z0yipUk3LMMuzRh9Pi6C6y81RyvlKjetaGdqq7fWcrbnkHOVKJqwSxaCYgb48at03rIuDrI+Dl3nqOh92reexWg4hovDWES1hV3E+2Abn7nrD8xAXBcUGdXB/1RmgQPIZREviYwd2WZZ8tlU7teb8xlYMKquIXxk6VxF9Q== ubuntu@devops' > /root/.ssh/authorized_keys && 
+        chmod 700 /root/.ssh && 
+        chmod 600 /root/.ssh/authorized_keys && 
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && 
+        sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && 
+        /usr/sbin/sshd -D
+      "
+
+  Monitoring:
+    image: ubuntu:latest
+    container_name: Monitoring
+    hostname: Monitoring
+    restart: unless-stopped
+    networks:
+      production:
+        ipv4_address: 192.168.100.30
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y openssh-server python3 sudo && 
+        mkdir -p /run/sshd && 
+        mkdir -p /root/.ssh && 
+        echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDvNUA8tkhRe58LD1YOjnSK4g20jmKHb07ETrXdOGr5C4xFPEOCayPRb7wP+Pl8/1ZvMnJFmcSR9aToKClfgJMtKgkZEZk+vK5TTCev2VQaTAFFH7ePq3gTKpMW4vSaKNrMn/ouMUHAoPK/Wmg8Fd0mIo85rVznxnNL8cvj68wraKMRiqb5YD16rVzX62qxUHXuU7QEBS4PEpgBxQplyqSD90B9rbepvTYMkwEusjPdo7BzCh38KO8mInJZY+Ji1ue+Kl9QuEfX+Rn73puz8m1AdrA+QocA0phK2SO4kBdjX3KcsN/H6a77NWBsCbE6EYhv2o/z4kaCr3k5Y2gfTS0wIp5gbkcIeyPJ8Vyg62nlkOTywkVA9L2bHQluhn4aiLFAdGAF4hIXSazLmkUUW68a/T9TasDyBuaRiBwp2keB4qhcs+b4sIXPnskOsZHw4w+stJX9GLc9kGegvmwWrlpgitUVf8/IiJqIg7VZlBkk1wOg4BSEhvx2lolhE+SW3zg/6uP/z0yipUk3LMMuzRh9Pi6C6y81RyvlKjetaGdqq7fWcrbnkHOVKJqwSxaCYgb48at03rIuDrI+Dl3nqOh92reexWg4hovDWES1hV3E+2Abn7nrD8xAXBcUGdXB/1RmgQPIZREviYwd2WZZ8tlU7teb8xlYMKquIXxk6VxF9Q== ubuntu@devops' > /root/.ssh/authorized_keys && 
+        chmod 700 /root/.ssh && 
+        chmod 600 /root/.ssh/authorized_keys && 
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && 
+        sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && 
+        /usr/sbin/sshd -D
+      "
+
+  FTP2:
+    image: ubuntu:latest
+    container_name: FTP2
+    hostname: ftp2.devops.org
+    restart: unless-stopped
+    networks:
+      production:
+        ipv4_address: 192.168.100.50
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y openssh-server python3 sudo && 
+        mkdir -p /run/sshd && 
+        mkdir -p /root/.ssh && 
+        echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDvNUA8tkhRe58LD1YOjnSK4g20jmKHb07ETrXdOGr5C4xFPEOCayPRb7wP+Pl8/1ZvMnJFmcSR9aToKClfgJMtKgkZEZk+vK5TTCev2VQaTAFFH7ePq3gTKpMW4vSaKNrMn/ouMUHAoPK/Wmg8Fd0mIo85rVznxnNL8cvj68wraKMRiqb5YD16rVzX62qxUHXuU7QEBS4PEpgBxQplyqSD90B9rbepvTYMkwEusjPdo7BzCh38KO8mInJZY+Ji1ue+Kl9QuEfX+Rn73puz8m1AdrA+QocA0phK2SO4kBdjX3KcsN/H6a77NWBsCbE6EYhv2o/z4kaCr3k5Y2gfTS0wIp5gbkcIeyPJ8Vyg62nlkOTywkVA9L2bHQluhn4aiLFAdGAF4hIXSazLmkUUW68a/T9TasDyBuaRiBwp2keB4qhcs+b4sIXPnskOsZHw4w+stJX9GLc9kGegvmwWrlpgitUVf8/IiJqIg7VZlBkk1wOg4BSEhvx2lolhE+SW3zg/6uP/z0yipUk3LMMuzRh9Pi6C6y81RyvlKjetaGdqq7fWcrbnkHOVKJqwSxaCYgb48at03rIuDrI+Dl3nqOh92reexWg4hovDWES1hV3E+2Abn7nrD8xAXBcUGdXB/1RmgQPIZREviYwd2WZZ8tlU7teb8xlYMKquIXxk6VxF9Q== ubuntu@devops' > /root/.ssh/authorized_keys && 
+        chmod 700 /root/.ssh && 
+        chmod 600 /root/.ssh/authorized_keys && 
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && 
+        sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && 
+        /usr/sbin/sshd -D
+      "
+
+  NetworkSecurity:
+    image: ubuntu:latest
+    container_name: NetworkSecurity
+    hostname: NetworkSecurity
+    restart: unless-stopped
+    networks:
+      production:
+        ipv4_address: 192.168.100.40
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y openssh-server python3 sudo && 
+        mkdir -p /run/sshd && 
+        mkdir -p /root/.ssh && 
+        echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDvNUA8tkhRe58LD1YOjnSK4g20jmKHb07ETrXdOGr5C4xFPEOCayPRb7wP+Pl8/1ZvMnJFmcSR9aToKClfgJMtKgkZEZk+vK5TTCev2VQaTAFFH7ePq3gTKpMW4vSaKNrMn/ouMUHAoPK/Wmg8Fd0mIo85rVznxnNL8cvj68wraKMRiqb5YD16rVzX62qxUHXuU7QEBS4PEpgBxQplyqSD90B9rbepvTYMkwEusjPdo7BzCh38KO8mInJZY+Ji1ue+Kl9QuEfX+Rn73puz8m1AdrA+QocA0phK2SO4kBdjX3KcsN/H6a77NWBsCbE6EYhv2o/z4kaCr3k5Y2gfTS0wIp5gbkcIeyPJ8Vyg62nlkOTywkVA9L2bHQluhn4aiLFAdGAF4hIXSazLmkUUW68a/T9TasDyBuaRiBwp2keB4qhcs+b4sIXPnskOsZHw4w+stJX9GLc9kGegvmwWrlpgitUVf8/IiJqIg7VZlBkk1wOg4BSEhvx2lolhE+SW3zg/6uP/z0yipUk3LMMuzRh9Pi6C6y81RyvlKjetaGdqq7fWcrbnkHOVKJqwSxaCYgb48at03rIuDrI+Dl3nqOh92reexWg4hovDWES1hV3E+2Abn7nrD8xAXBcUGdXB/1RmgQPIZREviYwd2WZZ8tlU7teb8xlYMKquIXxk6VxF9Q== ubuntu@devops' > /root/.ssh/authorized_keys && 
+        chmod 700 /root/.ssh && 
+        chmod 600 /root/.ssh/authorized_keys && 
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && 
+        sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config && 
+        /usr/sbin/sshd -D
+      "

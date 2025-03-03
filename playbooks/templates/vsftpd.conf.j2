@@ -1,0 +1,43 @@
+# FTP server configuration
+# Created by Ansible
+
+# Access control settings
+anonymous_enable={{ anonymous_enable | lower }}
+local_enable={{ local_enable | lower }}
+write_enable={{ write_enable | lower }}
+
+# System settings
+listen=YES
+listen_ipv6=NO
+connect_from_port_20=YES
+secure_chroot_dir=/var/run/vsftpd/empty
+pam_service_name=vsftpd
+
+# Passive mode settings
+pasv_enable=YES
+pasv_min_port=40000
+pasv_max_port=50000
+
+# File/directory settings
+dirmessage_enable=YES
+use_localtime=YES
+xferlog_enable=YES
+xferlog_file=/var/log/vsftpd.log
+
+# User settings - allow users to be chrooted
+chroot_local_user={{ chroot_local_user | lower }}
+allow_writeable_chroot=YES
+
+# Security settings
+hide_ids=YES
+
+# Banner
+ftpd_banner={{ ftp_banner }}
+
+# User settings
+userlist_enable=YES
+userlist_file=/etc/vsftpd.user_list
+userlist_deny=NO
+
+# Comment out the local_root directive to use user's home directory from /etc/passwd
+# local_root=/home/ubuntu

@@ -1,0 +1,21 @@
+- name: Check internet connectivity from web servers
+  hosts: all
+  tasks:
+    - name: Check internet access
+      uri:
+        url: https://www.google.com
+        method: GET
+        return_content: no
+      register: result
+      ignore_errors: yes
+
+    - name: Display connectivity status
+      debug:
+        msg: "Internet is reachable"  
+      when: result.status == 200
+
+    - name: Display failure message
+      debug:
+        msg: "No internet access!"  
+      when: result.failed is defined and result.failed
+

@@ -1,0 +1,85 @@
+---
+- name: Install Security Tools
+  hosts: webservers
+  tasks:
+    - name: Install gpg (Ubuntu)
+      apt:
+        name: gnupg
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      become: yes
+
+    - name: Install Security Tools on Ubuntu
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - snort
+        - fail2ban
+        - ufw
+      when: ansible_distribution == "Ubuntu"
+      become: yes
+      ignore_errors: yes  # Continue if one package fails
+
+    - name: Install Security Tools on CentOS
+      block:
+        - name: Install EPEL repository
+          dnf:
+            name: epel-release
+            state: present
+          become: yes
+        
+        - name: Install Security Tools on CentOS
+          dnf:
+            name: "{{ item }}"
+            state: present
+          loop:
+            - firewalld
+          become: yes
+      when: ansible_distribution == "CentOS"
+
+- name: Install Monitoring Stack
+  hosts: all
+  tasks:
+    # Install gpg for all Ubuntu systems
+    - name: Install gpg (Ubuntu)
+      apt:
+        name: gnupg
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      become: yes
+
+    # Alternative approach - install Prometheus monitoring
+    - name: Install Prometheus and related tools (Ubuntu)
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - prometheus
+        - prometheus-node-exporter
+        - prometheus-alertmanager
+      when: ansible_distribution == "Ubuntu"
+      become: yes
+      ignore_errors: yes  # Continue if one package fails
+
+    - name: Install Prometheus and related tools (CentOS)
+      block:
+        - name: Install EPEL repository
+          dnf:
+            name: epel-release
+            state: present
+          become: yes
+        
+        - name: Install Prometheus tools or alternatives
+          dnf:
+            name: "{{ item }}"
+            state: present
+          loop:
+            - sysstat  # Basic system monitoring tool
+            - net-tools  # Network utilities
+          become: yes
+      when: ansible_distribution == "CentOS"

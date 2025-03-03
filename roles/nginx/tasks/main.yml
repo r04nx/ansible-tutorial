@@ -1,0 +1,51 @@
+---
+- name: Install nginx
+  package:
+    name: nginx
+    state: present
+  become: yes
+
+- name: Ensure nginx is started and enabled
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Create test directory
+  file:
+    path: /usr/share/nginx/html/test
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Deploy nginx test page configuration
+  template:
+    src: test-page.conf.j2
+    dest: /etc/nginx/conf.d/test-page.conf
+    mode: '0644'
+  become: yes
+  notify: restart nginx
+
+- name: Deploy dynamic test page
+  template:
+    src: test-index.html.j2
+    dest: /usr/share/nginx/html/test/index.html
+    mode: '0644'
+  become: yes
+
+# Static files example: Deploy a logo
+- name: Create assets directory
+  file:
+    path: /usr/share/nginx/html/test/assets
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Deploy static favicon
+  copy:
+    src: favicon.ico
+    dest: /usr/share/nginx/html/test/assets/favicon.ico
+    mode: '0644'
+  become: yes
+  ignore_errors: yes  # In case we haven't created this file yet

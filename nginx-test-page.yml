@@ -1,0 +1,6 @@
+---
+- name: Deploy Nginx with dynamic test page
+  hosts: webservers
+  gather_facts: yes  # Needed for ansible_date_time
+  roles:
+    - nginx

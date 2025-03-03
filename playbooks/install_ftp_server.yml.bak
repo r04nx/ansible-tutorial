@@ -1,0 +1,107 @@
+---
+- name: Install and Configure FTP Server
+  hosts: ftpservers
+  become: yes
+  vars:
+    ftp_users:
+      - username: ftpuser
+        password: "FtpPass123"
+        local_root: /var/ftp/ftpuser
+        chroot: yes
+        write_access: yes
+      - username: readonly
+        password: "FtpPass123"
+        local_root: /var/ftp/readonly
+        chroot: yes
+        write_access: no
+    ftp_banner: "Welcome to DevOps FTP Server"
+    anonymous_enable: no
+    local_enable: yes
+    write_enable: yes
+    chroot_local_user: yes
+  tasks:
+    - name: Install vsftpd
+      apt:
+        name: vsftpd
+        state: present
+        update_cache: yes
+    
+    - name: Backup original vsftpd.conf
+      copy:
+        src: /etc/vsftpd.conf
+        dest: /etc/vsftpd.conf.bak
+        remote_src: yes
+        force: no
+    
+    - name: Configure vsftpd.conf
+      template:
+        src: templates/vsftpd.conf.j2
+        dest: /etc/vsftpd.conf
+        owner: root
+        group: root
+        mode: '0644'
+      register: vsftpd_conf
+    
+    - name: Create FTP user directories
+      file:
+        path: "{{ item.local_root }}"
+        state: directory
+        mode: '0755'
+      with_items: "{{ ftp_users }}"
+      register: user_dirs
+    
+    - name: Create FTP users
+      user:
+        name: "{{ item.username }}"
+        home: "{{ item.local_root }}"
+        shell: /bin/bash
+        state: present
+      with_items: "{{ ftp_users }}"
+    
+    - name: Set user passwords
+      shell: "echo '{{ item.username }}:{{ item.password }}' | chpasswd"
+      with_items: "{{ ftp_users }}"
+      no_log: true
+    
+    - name: Set correct permissions for FTP user directories
+      file:
+        path: "{{ item.local_root }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        recurse: yes
+      with_items: "{{ ftp_users }}"
+    
+    - name: Create a user list file for vsftpd
+      copy:
+        content: |
+          {% for user in ftp_users %}
+          {{ user.username }}
+          {% endfor %}
+        dest: /etc/vsftpd.user_list
+        owner: root
+        group: root
+        mode: '0644'
+    
+    - name: Create empty secure_chroot_dir
+      file:
+        path: /var/run/vsftpd/empty
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+    
+    - name: Restart vsftpd service
+      systemd:
+        name: vsftpd
+        state: restarted
+        enabled: yes
+    
+    - name: Get process status
+      shell: "ps aux | grep [v]sftpd"
+      register: process_status
+    
+    - name: Display vsftpd process status
+      debug:
+        var: process_status.stdout_lines

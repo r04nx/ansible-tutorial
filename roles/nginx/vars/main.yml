@@ -1,0 +1,6 @@
+---
+# Define variables for our nginx configuration
+nginx_port: 80
+nginx_server_name: "{{ inventory_hostname }}"
+nginx_welcome_message: "Welcome to {{ inventory_hostname }} - Managed by Ansible!"
+nginx_color: "{{ '#' + (inventory_hostname | hash('md5'))[:6] }}"
